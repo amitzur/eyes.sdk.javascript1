@@ -119,6 +119,27 @@ describe('RenderRequest', () => {
       }
       assert.deepEqual(renderRequest.toJSON(), expected);
     });
+
+    it.only('includes sendDom even if it\'s false', () => {
+      const dom = {
+        getHashAsObject() { return 'dom_hashAsObject'; }
+      };
+      const renderRequest = new RenderRequest({
+        webhook: 'webhook',
+        url: 'url',
+        dom,
+        resources: [],
+        sendDom: false
+      });
+      const expected = {
+        webhook: 'webhook',
+        url: 'url',
+        dom: 'dom_hashAsObject',
+        resources: {},
+        sendDom: false
+      }
+      assert.deepEqual(renderRequest.toJSON(), expected);
+    })
   });
 
   describe('toString', () => {
