@@ -13,11 +13,14 @@ class AppEnvironment {
    * @param {string} [hostingApp]
    * @param {RectangleSize} [displaySize]
    */
-  constructor(os, hostingApp, displaySize) {
+  constructor(os, hostingApp, displaySize, deviceInfo, osInfo, hostingAppInfo) {
     this._inferred = undefined;
     this._os = os;
     this._hostingApp = hostingApp;
     this._displaySize = displaySize;
+    this._deviceInfo = deviceInfo;
+    this._osInfo = osInfo;
+    this._hostingAppInfo = hostingAppInfo;
   }
 
   // noinspection JSUnusedGlobalSymbols
@@ -106,6 +109,62 @@ class AppEnvironment {
    */
   setDisplaySize(value) {
     this._displaySize = value;
+  }
+
+  /**
+   * Gets the OS hosting the application under test or {@code null} if unknown. (not part of test signature)
+   *
+   * @return {string}
+   */
+  getOsInfo() {
+    return this._osInfo;
+  }
+
+  /**
+   * Sets the OS hosting the application under test or {@code null} if unknown. (not part of test signature)
+   *
+   * @param {string} value
+   */
+  setOs(value) {
+    this._osInfo = value;
+  }
+
+  // noinspection JSUnusedGlobalSymbols
+  /**
+   * Gets the application hosting the application under test or {@code null} if unknown. (not part of test signature)
+   *
+   * @return {string}
+   */
+  getHostingAppInfo() {
+    return this._hostingAppInfo;
+  }
+
+  /**
+   * Sets the application hosting the application under test or {@code null} if unknown. (not part of test signature)
+   *
+   * @param {string} value
+   */
+  setHostingAppInfo(value) {
+    this._hostingAppInfo = value;
+  }
+
+  // noinspection JSUnusedGlobalSymbols
+  /**
+   * Gets the device info (not part of test signature)
+   *
+   * @return {string}
+   */
+  getDeviceInfo() {
+    return this._deviceInfo;
+  }
+
+  /**
+   * Sets the device info (not part of test signature)
+   *
+   * @param {string} value
+   */
+  setDeviceInfo(value) {
+    this._deviceInfo = value;
   }
 
   /** @override */
