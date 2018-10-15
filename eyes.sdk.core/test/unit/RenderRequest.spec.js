@@ -120,7 +120,7 @@ describe('RenderRequest', () => {
       assert.deepEqual(renderRequest.toJSON(), expected);
     });
 
-    it.only('includes sendDom even if it\'s false', () => {
+    it('includes sendDom even if it\'s false', () => {
       const dom = {
         getHashAsObject() { return 'dom_hashAsObject'; }
       };
