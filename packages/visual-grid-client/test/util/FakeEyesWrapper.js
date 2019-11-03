@@ -67,11 +67,11 @@ class FakeEyesWrapper extends EventEmitter {
     this._serverConnector = {deleteBatchSessions: () => {}};
   }
 
-  async open(_appName, _testName, _viewportSize) {
+  async open(...args) {
     this.results = [];
     return new Promise(res =>
       setTimeout(() => {
-        this.emit('openEnd');
+        this.emit('openEnd', args);
         res();
       }, 100),
     );
@@ -197,6 +197,25 @@ class FakeEyesWrapper extends EventEmitter {
       setTimeout(() => {
         this.emit('checkWindowEnd');
         res(result);
+      }, 100),
+    );
+  }
+
+  async testWindow(...args) {
+    return new Promise(res =>
+      setTimeout(() => {
+        this.emit('testWindowEnd', args);
+        const results = new TestResults({stepsInfo: [{}]});
+        res(results);
+      }, 100),
+    );
+  }
+
+  async closeTestWindow(results, throwEx) {
+    return new Promise(res =>
+      setTimeout(() => {
+        this.emit('closeTestWindowEnd', [results, throwEx]);
+        res(results);
       }, 100),
     );
   }

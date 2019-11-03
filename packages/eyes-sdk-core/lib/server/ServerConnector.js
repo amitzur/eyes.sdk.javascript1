@@ -52,6 +52,9 @@ const REQUEST_FAILED_CODES = [
   'ENOTFOUND',
 ];
 
+let counter = 0;
+const REQUEST_GUID = GeneralUtils.guid();
+
 /**
  * @typedef {{data: *, status: number, statusText: string, headers: *, request: *}} AxiosResponse
  */
@@ -73,13 +76,18 @@ async function sendRequest(self, name, options, retry = 1, delayBeforeRetry = fa
     options.data = '';
   }
 
+  counter += 1;
+  const requestId = `${counter}--${REQUEST_GUID}`;
+  options.headers['x-applitools-eyes-client-request-id'] = requestId;
+
   // eslint-disable-next-line max-len
-  self._logger.verbose(`ServerConnector.${name} will now call to ${options.url} with params ${JSON.stringify(options.params)}`);
+  self._logger.verbose(`ServerConnector.${name} [${requestId}] will now call to ${options.url} with params ${JSON.stringify(options.params)}`);
+
   try {
     const response = await axios(options);
 
     // eslint-disable-next-line max-len
-    self._logger.verbose(`ServerConnector.${name} - result ${response.statusText}, status code ${response.status}, url ${options.url}`);
+    self._logger.verbose(`ServerConnector.${name} [${requestId}] - result ${response.statusText}, status code ${response.status}, url ${options.url}`);
     return response;
   } catch (err) {
     let reasonMsg = err.message;
@@ -88,7 +96,7 @@ async function sendRequest(self, name, options, retry = 1, delayBeforeRetry = fa
     }
 
     // eslint-disable-next-line max-len
-    self._logger.log(`ServerConnector.${name} - ${options.method} failed on ${options.url}: ${reasonMsg} with params ${JSON.stringify(options.params).slice(0, 100)} body:\n${err.response && err.response.data}`);
+    self._logger.log(`ServerConnector.${name} [${requestId}] - ${options.method} failed on ${options.url}: ${reasonMsg} with params ${JSON.stringify(options.params).slice(0, 100)} body:\n${err.response && err.response.data}`);
     self._logger.verbose(`ServerConnector.${name} - failure body:\n${err.response && err.response.data}`);
 
     if (retry > 0 && ((err.response && HTTP_FAILED_CODES.includes(err.response.status)) || REQUEST_FAILED_CODES.includes(err.code))) {

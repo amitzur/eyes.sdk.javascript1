@@ -79,7 +79,6 @@ describe('openEyes', () => {
     const resourceUrls = wrapper.goodResourceUrls;
     const cdt = loadJsonFixture('test.cdt.json');
     checkWindow({resourceUrls, cdt, tag: 'good1', url: `${baseUrl}/test.html`});
-
     expect((await close())[0].getStepsInfo().map(r => r.result.getAsExpected())).to.eql([true]);
   });
 
@@ -1181,7 +1180,7 @@ describe('openEyes', () => {
     });
 
     checkWindow({});
-    expect(await close()).to.equal(undefined);
+    expect(await close()).to.eql([]);
     expect(await abort()).to.equal(undefined);
   });
 

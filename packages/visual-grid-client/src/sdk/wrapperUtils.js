@@ -98,7 +98,14 @@ function configureWrappers({
   }
 }
 
-function openWrappers({wrappers, browsers, appName, testName, eyesTransactionThroat}) {
+function openWrappers({
+  wrappers,
+  browsers,
+  appName,
+  testName,
+  eyesTransactionThroat,
+  startSession,
+}) {
   const openPromisesAndResolves = wrappers.map(() => {
     let resolve;
     const promise = new Promise(r => (resolve = r));
@@ -106,7 +113,7 @@ function openWrappers({wrappers, browsers, appName, testName, eyesTransactionThr
   });
   return wrappers
     .map((wrapper, i) => {
-      const viewportSize = browsers[i].width && new RectangleSize(browsers[i]);
+      const viewportSize = startSession && browsers[i].width && new RectangleSize(browsers[i]);
       return eyesTransactionThroat(() =>
         wrapper.open(appName, testName, viewportSize).then(openPromisesAndResolves[i].resolve),
       );

@@ -11,6 +11,7 @@ function makeClose({
   testController,
   logger,
   batches,
+  isSingleWindow,
 }) {
   const waitAndResolveTests = makeWaitForTestEnd({
     getCheckWindowPromises,
@@ -18,6 +19,7 @@ function makeClose({
   });
 
   return async (throwEx = true) => {
+    let error, didError;
     const settleError = (throwEx ? Promise.reject : Promise.resolve).bind(Promise);
 
     if (testController.getIsAbortedByUser()) {
@@ -25,13 +27,12 @@ function makeClose({
       return settleError([]);
     }
 
-    let error, didError;
-    return waitAndResolveTests(async testIndex => {
+    return waitAndResolveTests(async (testIndex, checkWindowResult) => {
       resolveTests[testIndex]();
 
       if ((error = testController.getFatalError())) {
         logger.log('closeEyes() fatal error found');
-        await wrappers[testIndex].ensureAborted();
+        !isSingleWindow && (await wrappers[testIndex].ensureAborted());
         return (didError = true), error;
       }
       if ((error = testController.getError(testIndex))) {
@@ -39,13 +40,12 @@ function makeClose({
         return (didError = true), error;
       }
 
-      const [closeError, closeResult] = await presult(wrappers[testIndex].close(throwEx));
+      const closePromise = !isSingleWindow
+        ? wrappers[testIndex].close(throwEx)
+        : wrappers[testIndex].closeTestWindow(checkWindowResult, throwEx);
+      const [closeError, closeResult] = await presult(closePromise);
       if (!closeError) {
-        const renderIds = testController.getRenderIds(testIndex);
-        const steps = closeResult.getStepsInfo();
-        for (const [i, renderId] of renderIds.entries()) {
-          steps[i].setRenderId(renderId);
-        }
+        setRenderIds(closeResult, testIndex);
         return closeResult;
       } else {
         didError = true;
@@ -56,6 +56,14 @@ function makeClose({
       return didError ? settleError(results) : results;
     });
   };
+
+  function setRenderIds(result, testIndex) {
+    const renderIds = testController.getRenderIds(testIndex);
+    const steps = result.getStepsInfo();
+    for (const [i, renderId] of renderIds.entries()) {
+      steps[i].setRenderId(renderId);
+    }
+  }
 }
 
 module.exports = makeClose;

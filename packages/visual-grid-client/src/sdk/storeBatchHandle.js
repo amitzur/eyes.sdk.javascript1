@@ -2,7 +2,7 @@
 
 function storeBatchHandle(wrappers, batches) {
   const batchId = wrappers[0].getExistingBatchId();
-  if (batchId && !batches.has()) {
+  if (batchId && !batches.has(batchId)) {
     const deleteBatchSessions = wrappers[0]._serverConnector.deleteBatchSessions.bind(
       wrappers[0]._serverConnector,
     );
