@@ -19,20 +19,22 @@ function makeGlobalState({logger}) {
   function setQueuedRendersCount(value) {
     logger.log('setting queued renders count to', value);
     queuedRendersCount = value;
-    const condition = queuedRendersConditions[0];
-    condition && condition();
+    checkCondition();
   }
 
   async function waitForQueuedRenders(desiredCount) {
-    if (desiredCount <= queuedRendersCount) {
+    if (desiredCount < queuedRendersCount) {
       return new Promise(resolve => {
-        queuedRendersConditions.push(newCount => {
-          if (desiredCount > newCount) {
-            queuedRendersConditions.pop();
-            resolve();
-          }
-        });
+        queuedRendersConditions.push({resolve, desiredCount});
       });
+    }
+  }
+
+  function checkCondition() {
+    const condition = queuedRendersConditions[0];
+    if (condition && condition.desiredCount >= queuedRendersCount) {
+      queuedRendersConditions.splice(0, 1);
+      condition.resolve();
     }
   }
 }
